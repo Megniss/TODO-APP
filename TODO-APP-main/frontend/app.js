@@ -1,64 +1,63 @@
-fetch('http://localhost:3000/tasks')
-  .then(response => response.json())
-  .then(tasks => {
-    const tasksList = document.getElementById('tasks-list');
-    tasksList.innerHTML = '';
+// frontend/app.js
+const API_URL    = '/tasks';
+const form       = document.getElementById('task-form');
+const titleInput = document.getElementById('task-title');
+const list       = document.getElementById('tasks-list');
 
-    tasks.forEach(task => {
-      const taskItem = document.createElement('li');
-      taskItem.textContent = task.title;
-      
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Dzēst';
-      deleteButton.addEventListener('click', function () {
-        fetch(`http://localhost:3000/tasks/${task._id}`, {
-          method: 'DELETE',
-        })
-        .then(() => taskItem.remove())
-        .catch(error => console.error('Kļūda dzēšot uzdevumu:', error));
-      });
+function renderTask(task) {
+  const li = document.createElement('li');
+  
+  const text = document.createElement('span');
+  text.textContent = task.title;
+  if (task.completed) {
+    text.style.textDecoration = 'line-through';
+  }
+  li.appendChild(text);
 
-      taskItem.appendChild(deleteButton);
-      tasksList.appendChild(taskItem);
+  // checkbox completed
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = task.completed;
+  checkbox.addEventListener('change', async () => {
+    await fetch(`${API_URL}/${task._id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: checkbox.checked, title: task.title })
     });
-  })
-  .catch(error => console.error('Kļūda iegūstot uzdevumus:', error));
+    loadTasks();
+  });
+  li.insertBefore(checkbox, text);
 
-const form = document.getElementById('task-form');
-form.addEventListener('submit', function (event) {
-  event.preventDefault();
+  // delete button
+  const btn = document.createElement('button');
+  btn.textContent = 'Dzēst';
+  btn.addEventListener('click', async () => {
+    await fetch(`${API_URL}/${task._id}`, { method: 'DELETE' });
+    loadTasks();
+  });
+  li.appendChild(btn);
 
-  const title = document.getElementById('task-title').value;
+  list.appendChild(li);
+}
 
-  fetch('http://localhost:3000/tasks', {
+async function loadTasks() {
+  const res   = await fetch(API_URL);
+  const tasks = await res.json();
+  list.innerHTML = '';
+  tasks.forEach(renderTask);
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const title = titleInput.value.trim();
+  if (!title) return;
+  await fetch(API_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ title }),
-  })
-  .then(response => response.json())
-  .then(task => {
-    console.log('Jauns uzdevums pievienots:', task);
-
-    const tasksList = document.getElementById('tasks-list');
-    const taskItem = document.createElement('li');
-    taskItem.textContent = task.title;
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Dzēst';
-    deleteButton.addEventListener('click', function () {
-      fetch(`http://localhost:3000/tasks/${task._id}`, {
-        method: 'DELETE',
-      })
-      .then(() => taskItem.remove())
-      .catch(error => console.error('Kļūda dzēšot uzdevumu:', error));
-    });
-
-    taskItem.appendChild(deleteButton);
-    tasksList.appendChild(taskItem);
-
-    form.reset();
-  })
-  .catch(error => console.error('Kļūda pievienojot uzdevumu:', error));
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title })
+  });
+  form.reset();
+  loadTasks();
 });
+
+window.addEventListener('DOMContentLoaded', loadTasks);

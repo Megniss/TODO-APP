@@ -1,22 +1,21 @@
+<!-- frontend/index.html -->
 <!DOCTYPE html>
 <html lang="lv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ToDo Projekts</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>ToDo Saraksts</h1>
-
-  <form id="task-form">
-    <input type="text" id="task-title" placeholder="Jauns uzdevums" required>
-    <button type="submit">Pievienot uzdevumu</button>
-  </form>
-
-  <h2>Uzdevumi:</h2>
-  <ul id="tasks-list"></ul>
-
+  <div class="container">
+    <h1>ToDo Saraksts</h1>
+    <form id="task-form">
+      <input type="text" id="task-title" placeholder="Jauns uzdevums" required />
+      <button type="submit">Pievienot</button>
+    </form>
+    <ul id="tasks-list"></ul>
+  </div>
   <script src="app.js"></script>
 </body>
 </html>
